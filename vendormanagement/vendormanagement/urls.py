@@ -16,13 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from VendorX.views import create_vendor, get_vendors, specific_vendor
-
+from VendorX.views import vendors, specific_vendor, purchase_order, specific_purchase_order
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/create_vendor/', create_vendor),
-    path('api/vendors/', get_vendors),
+    path('api/vendors/', vendors),
     path('api/vendors/<int:vendor_id>/', specific_vendor),
+    path('api/purchase_order/', purchase_order),
+    path('api/purchase_order/<int:po_number>/', specific_purchase_order),
 ]
