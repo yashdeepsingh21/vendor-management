@@ -102,7 +102,7 @@ def specific_purchase_order(request, po_number):
             data = json.loads(request.body.decode('utf-8'))
             po = PurchaseOrder.objects.get(po_number=po_number)
             po.items = data['items']
-            po.quantity = data.get('quantity',)
+            po.quantity = data.get('quantity', )
             if po.items and po.quantity:
                 po.save()
                 return HttpResponse('product details updated successfully')
@@ -114,5 +114,37 @@ def specific_purchase_order(request, po_number):
             return HttpResponse('Product deleted successfully')
         return HttpResponse("unable to get data")
 
+    except Exception as e:
+        return HttpResponse(e)
+
+
+# API vendor performance metrics
+
+# def vendor_performance(request, vendor_code):
+#     try:
+#         vendor = vendor_code
+#         if request.method == 'GET':
+#             performance = PerformanceModel.objects.filter(vendor=vendor)
+#             serialized_performance = serialize('json', performance)
+#             return HttpResponse(serialized_performance)
+#
+#         elif request.method == "POST":
+#             data =  PurchaseOrder.objects.filter(vendor=vendor_code, status="completed")
+#
+
+
+# Acknowledgement Api
+
+def acknowledgement(request, po_id):
+    try:
+        po_number = po_id
+        if request.method == 'POST':
+            po = PurchaseOrder.objects.get(po_number=po_number)
+            po.quality_rating = request.POST.get('quality_rating', 1)
+            po.acknowledgment_date = datetime.now()
+            po.status = "completed"
+            po.save()
+            return HttpResponse('acknowledgment date updated successfully')
+        return HttpResponse("error with the code")
     except Exception as e:
         return HttpResponse(e)
