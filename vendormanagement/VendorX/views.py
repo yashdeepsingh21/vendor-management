@@ -101,16 +101,17 @@ def specific_purchase_order(request, po_number):
         elif request.method == 'PUT':
             data = json.loads(request.body.decode('utf-8'))
             po = PurchaseOrder.objects.get(po_number=po_number)
-            po.status = data['status']
-            po.quality_rating = data.get('quality_rating', 0)
-            po.acknowledgment_date = datetime.now()
-            po.save()
-            return HttpResponse('put request works successfully')
+            po.items = data['items']
+            po.quantity = data.get('quantity',)
+            if po.items and po.quantity:
+                po.save()
+                return HttpResponse('product details updated successfully')
+            return HttpResponse("product not update or found")
 
         elif request.method == 'DELETE':
             po = PurchaseOrder.objects.get(po_number=po_number)
             po.delete()
-            return HttpResponse('delete request works successfully')
+            return HttpResponse('Product deleted successfully')
         return HttpResponse("unable to get data")
 
     except Exception as e:
