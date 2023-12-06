@@ -6,6 +6,47 @@ import json
 from datetime import datetime, timedelta
 
 
+def on_time_delivery_rate(vendor):
+    try:
+        vendor = vendor
+        status = PurchaseOrder.objects.filter(vendor=vendor)
+        delivery_rate = count = quality_rating = avg_respose_time = count2 = 0
+        for value in status:
+            if value.status == 'completed' and value.order_date <= value.delivery_date:
+                delivery_rate += 1
+                count += 1
+            if value.quality_rating:
+                quality_rating += value.quality_rating
+            if value.issue_date and value.acknowledgment_date:
+                avg_respose_time = value.acknowledgment_date - value.issue_date
+                count2 += 1
+        avg_response_time = avg_respose_time // count2
+        quality_rating = quality_rating // count
+        delivery_rate = delivery_rate // len(status) * 100
+        print(f"delivery_rate: {delivery_rate}% \n Quality rating: {quality_rating} \n \
+                   fullfillment_rate: {delivery_rate}% \n average_response_time: {avg_response_time.days}")
+
+        data = PerformanceModel.objects.get(vendor=vendor)
+        if not data:
+            performance = PerformanceModel(vendor=vendor, date=datetime.now(), on_time_delivery_rate=delivery_rate, \
+                                           quality_rating_avg=quality_rating,
+                                           average_response_time=avg_response_time.days, \
+                                           fulfillment_rate=delivery_rate)
+            performance.save()
+        else:
+            data.on_time_delivery_rate = delivery_rate
+            data.quality_rating_avg = quality_rating
+            data.average_response_time = avg_response_time.days
+            data.fulfillment_rate = delivery_rate
+            data.save()
+
+        return HttpResponse(f"delivery_rate: {delivery_rate}% \n Quality rating: {quality_rating} \n \
+                   fullfillment_rate: {delivery_rate}% \n average_response_time: {avg_response_time.days} days")
+
+    except Exception as e:
+        return HttpResponse(e)
+
+
 # Vendors API written down below
 def vendors(request):
     try:
@@ -139,12 +180,16 @@ def acknowledgement(request, po_id):
     try:
         po_number = po_id
         if request.method == 'POST':
-            po = PurchaseOrder.objects.get(po_number=po_number)
+            po = PurchaseOrder.objects.filter(po_number=po_number)
+            print(po.vendor_code)
             po.quality_rating = request.POST.get('quality_rating', 1)
             po.acknowledgment_date = datetime.now()
-            po.status = "completed"
+            po.status = "pending"
             po.save()
-            return HttpResponse('acknowledgment date updated successfully')
+            print(po.vendor, "vendor===========")
+            data = on_time_delivery_rate(vendor=po.vendor)
+            return HttpResponse(data)
         return HttpResponse("error with the code")
+
     except Exception as e:
         return HttpResponse(e)

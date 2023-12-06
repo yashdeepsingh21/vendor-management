@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from VendorX.views import vendors, specific_vendor, purchase_order, specific_purchase_order,\
-    acknowledgement
+    acknowledgement, on_time_delivery_rate
 
 
 urlpatterns = [
@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/purchase_order/', purchase_order),
     path('api/purchase_order/<int:po_number>/', specific_purchase_order),
     path('api/purchase_orders/<int:po_id>/acknowledge/', acknowledgement),
+    path('api/on_time/', on_time_delivery_rate),
 ]
